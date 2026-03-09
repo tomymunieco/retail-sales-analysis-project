@@ -1,0 +1,77 @@
+CREATE DATABASE IF NOT EXISTS retail_portfolio;
+
+
+USE retail_portfolio;
+
+
+CREATE TABLE dim_customer (
+    CustomerID INT PRIMARY KEY,
+    Country VARCHAR(100)
+);
+
+
+CREATE TABLE dim_product (
+    StockCode VARCHAR(50) PRIMARY KEY,
+    Description VARCHAR(255)
+);
+
+
+CREATE TABLE fact_sales (
+    Invoice VARCHAR(50),
+    StockCode VARCHAR(50),
+    CustomerID INT,
+    Quantity INT,
+    InvoiceDate DATETIME,
+    Price DECIMAL(10, 2),
+    LineTotal DECIMAL(10, 2),
+    Categoria VARCHAR(50),
+    
+    FOREIGN KEY (CustomerID) REFERENCES dim_customer(CustomerID),
+    FOREIGN KEY (StockCode) REFERENCES dim_product(StockCode)
+);
+
+
+LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/dim_customer.csv'
+INTO TABLE dim_customer
+FIELDS TERMINATED BY ',' 
+ENCLOSED BY '"'
+LINES TERMINATED BY '\r\n' 
+IGNORE 1 ROWS
+(CustomerID, Country);
+
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+
+LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/dim_product.csv'
+IGNORE INTO TABLE dim_product 
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+ESCAPED BY '"' 
+LINES TERMINATED BY '\r\n'
+IGNORE 1 ROWS
+(@v_stockcode, @v_description)
+SET 
+    StockCode = TRIM(@v_stockcode),
+    Description = TRIM(@v_description);
+
+
+LOAD DATA INFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/fact_sales.csv'
+INTO TABLE fact_sales
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS
+(@v_invoice, @v_customerid, @v_stockcode, @v_invoicedate, @v_quantity, @v_price, @v_linetotal, @v_categoria)
+SET 
+    Invoice = TRIM(@v_invoice),
+    CustomerID = CAST(@v_customerid AS SIGNED),
+    StockCode = TRIM(@v_stockcode),
+    InvoiceDate = STR_TO_DATE(TRIM(@v_invoicedate), '%Y-%m-%d %H:%i:%s'),
+    Quantity = CAST(@v_quantity AS SIGNED),
+    Price = CAST(@v_price AS DECIMAL(10,2)),
+    LineTotal = CAST(@v_linetotal AS DECIMAL(10,2)),
+    Categoria = TRIM(REPLACE(@v_categoria, '\r', ''));
+
+
+SET FOREIGN_KEY_CHECKS = 1;
