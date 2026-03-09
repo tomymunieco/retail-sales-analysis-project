@@ -52,5 +52,5 @@ El tablero final permite monitorear la salud financiera del negocio a través de
 
 
 ## 📫 Contacto
-* **LinkedIn:** [TomasEncina](www.linkedin.com/in/tomas-encina-217395202) 
+* **LinkedIn:** (www.linkedin.com/in/tomas-encina-217395202) 
 * **Email:** tomyencina23@gmail.com
